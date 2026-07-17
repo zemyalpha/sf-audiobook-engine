@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a14" />
+  <title>회수자 — 오디오북 | SF Novel Engine</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a14;
+      --surface: #12121f;
+      --surface-hover: #181830;
+      --border: #252540;
+      --accent: #6c8eef;
+      --accent-dim: #4a6cc0;
+      --text: #d0d0e8;
+      --text-muted: #6e6e8e;
+      --text-dim: #48486a;
+      --highlight: #e8a060;
+      --warm: #f0a060;
+      --seo-yeon: #6c8eef;
+      --min-jun: #e8a060;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 20, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header a.back {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    .header a.back:hover { color: var(--accent); }
+    .header .title {
+      font-size: 0.78rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    .player-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 50px 24px 30px;
+      text-align: center;
+    }
+
+    .album-cover {
+      width: 180px; height: 180px;
+      margin: 0 auto 30px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,142,239,0.15);
+    }
+
+    .album-cover .icon { font-size: 4rem; filter: grayscale(0.2); }
+    .album-cover.playing .pulse-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 28px;
+      border: 2px solid var(--accent);
+      opacity: 0;
+      animation: pulse 2s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.6; }
+      100% { transform: scale(1.08); opacity: 0; }
+    }
+
+    .track-info .genre-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      color: var(--accent);
+      background: rgba(108, 142, 239, 0.1);
+      border: 1px solid rgba(108, 142, 239, 0.3);
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    .track-info h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .track-info .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .audio-controls {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--warm));
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .control-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .speed-selector {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .speed-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .speed-btn:hover { color: var(--text); }
+    .speed-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-play {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      box-shadow: 0 4px 20px rgba(108,142,239,0.4);
+    }
+    .btn-play:hover { transform: scale(1.05); background: var(--accent-dim); }
+    .btn-play:active { transform: scale(0.95); }
+
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { color: var(--text); border-color: var(--accent); }
+
+    .cast-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .cast-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .cast-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .cast-card.do-yoon { border-left-color: var(--min-jun); }
+    .cast-card.granddaughter { border-left-color: var(--seo-yeon); }
+    .cast-card.internal { border-left-color: var(--text-muted); }
+
+    .cast-card .char-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .cast-card .voice-name {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+    .cast-card .desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .tech-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+
+    .tech-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+    }
+    .tech-box p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 0.8em;
+    }
+    .tech-box p:last-child { margin-bottom: 0; }
+    .tech-box strong { color: var(--highlight); }
+
+    /* 모바일 대응 — 태블릿 */
+    @media (max-width: 900px) {
+      .player-section, .cast-section, .tech-section { padding-left: 16px; padding-right: 16px; }
+      .cast-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 모바일 대응 — 스마트폰 */
+    @media (max-width: 640px) {
+      .header { padding: 10px 16px; }
+      .header a.back { font-size: 0.78rem; }
+      .header .title { font-size: 0.85rem; }
+
+      .player-section { padding: 30px 16px 16px; }
+      .album-cover { width: 130px; height: 130px; margin-bottom: 20px; }
+      .album-cover .icon { font-size: 3rem; }
+      .track-info .genre-tag { font-size: 0.62rem; padding: 3px 10px; margin-bottom: 10px; }
+      .track-info h1 { font-size: 1.25rem; }
+      .track-info .subtitle { font-size: 0.72rem; }
+
+      .audio-controls { padding: 16px; border-radius: 14px; }
+      .progress-bar { height: 5px; }
+      .time-display { font-size: 0.7rem; margin-bottom: 14px; }
+
+      .control-buttons {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .speed-selector { order: 2; width: 100%; justify-content: center; }
+      .speed-btn { font-size: 0.68rem; padding: 4px 8px; }
+      .btn-play { width: 50px; height: 50px; font-size: 1.3rem; order: 1; }
+      .btn-secondary { font-size: 0.72rem; padding: 7px 14px; order: 3; }
+
+      .cast-section, .tech-section { padding-bottom: 30px; }
+      .cast-grid { grid-template-columns: 1fr; gap: 10px; }
+      .cast-card { padding: 14px; }
+      .cast-card .char-name { font-size: 0.92rem; }
+      .cast-card .desc { font-size: 0.74rem; line-height: 1.5; }
+
+      .tech-box { padding: 16px; }
+      .tech-box p { font-size: 0.76rem; }
+    }
+
+    @media (max-width: 380px) {
+      .track-info h1 { font-size: 1.1rem; }
+      .album-cover { width: 110px; height: 110px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a class="back" href="/stories/the-retriever.html">← 소설</a>
+    <a class="back" href="/" style="margin-left:8px;">홈</a>
+    <span class="title" style="margin-left:auto;">SF Audiobook Engine</span>
+  </div>
+
+  <div class="player-section">
+    <div class="album-cover playing" id="albumCover">
+      <div class="pulse-ring"></div>
+      <span class="icon">🎧</span>
+    </div>
+
+    <div class="track-info">
+      <span class="genre-tag">원미래 우주 SF · 단편</span>
+      <h1>회수자</h1>
+      <p class="subtitle">The Retriever · 9분 32초 · 5개 음성 캐스팅</p>
+    </div>
+
+    <div class="audio-controls">
+      <audio id="audioPlayer" preload="metadata">
+        <source src="/audio/the-retriever.mp3" type="audio/mpeg">
+        <source src="/audio/the-retriever.m4b" type="audio/mp4">
+      </audio>
+
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="time-display">
+        <span id="currentTime">0:00</span>
+        <span id="totalTime">9:32</span>
+      </div>
+
+      <div class="control-buttons">
+        <div class="speed-selector">
+          <button class="speed-btn" data-speed="0.75">0.75x</button>
+          <button class="speed-btn active" data-speed="1.0">1.0x</button>
+          <button class="speed-btn" data-speed="1.25">1.25x</button>
+          <button class="speed-btn" data-speed="1.5">1.5x</button>
+        </div>
+        <button class="btn-play" id="playBtn">▶</button>
+        <button class="btn-secondary" id="back30Btn">⟲ 30s</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 캐스팅 -->
+  <div class="cast-section">
+    <p class="section-title">음성 캐스팅</p>
+    <div class="cast-grid">
+      <div class="cast-card">
+        <div class="char-name">서술자</div>
+        <div class="voice-name">ko-KR-InJoonNeural</div>
+        <div class="desc">객관적이고 차분한 3인칭 서술. 약간 낮고 안정적인 톤.</div>
+      </div>
+      <div class="cast-card do-yoon">
+        <div class="char-name">도윤</div>
+        <div class="voice-name">ko-KR-HyunsuMultilingualNeural</div>
+        <div class="desc">남성 30대. 과묵하고 관찰력이 뛰어남. 낮고 담담한 톤.</div>
+      </div>
+      <div class="cast-card granddaughter">
+        <div class="char-name">손녀</div>
+        <div class="voice-name">ko-KR-SunHiNeural</div>
+        <div class="desc">여성 30대. 슬프지만 할아버지를 위해 절제하는 톤.</div>
+      </div>
+      <div class="cast-card granddaughter" style="border-left-color: var(--min-jun);">
+        <div class="char-name">종수</div>
+        <div class="voice-name">ko-KR-HyunsuMultilingualNeural (느리고 약한)</div>
+        <div class="desc">남성 84세. 갈라지고 바스러지는 노인 목소리. pitch -10Hz.</div>
+      </div>
+      <div class="cast-card internal">
+        <div class="char-name">내면</div>
+        <div class="voice-name">ko-KR-SunHiNeural (속삭임)</div>
+        <div class="desc">도윤의 내면 독백. volume -15%로 속삭이듯 처리.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기술 정보 -->
+  <div class="tech-section">
+    <p class="section-title">기술 정보</p>
+    <div class="tech-box">
+      <p><strong>캐릭터 분석:</strong> 소설 텍스트를 문장 단위로 분할하여, 각 문장의 화자와 감정을 추출 → 캐릭터별 음성 프로필(rate/pitch/volume) 자동 적용</p>
+      <p><strong>감정 연기:</strong> 8가지 감정 태그(calm/angry/sad/tense/happy/fear/whisper/narration)에 따라 음성 속도·높낮이·볼륨을 미세 조정</p>
+      <p><strong>포맷:</strong> MP3 (128kbps) + M4B (오디오북, 96kbps AAC)</p>
+      <p><strong>분량:</strong> 56개 음성 세그먼트 + 씬 구분 정적 → 총 9분 32초</p>
+    </div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('audioPlayer');
+    const playBtn = document.getElementById('playBtn');
+    const progressFill = document.getElementById('progressFill');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalTimeEl = document.getElementById('totalTime');
+    const albumCover = document.getElementById('albumCover');
+    const back30Btn = document.getElementById('back30Btn');
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        playBtn.textContent = '⏸';
+        albumCover.classList.add('playing');
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶';
+        albumCover.classList.remove('playing');
+      }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + '%';
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      totalTimeEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+      playBtn.textContent = '▶';
+      albumCover.classList.remove('playing');
+    });
+
+    progressBar.addEventListener('click', (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = audio.duration * pct;
+    });
+
+    back30Btn.addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 30);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        audio.playbackRate = parseFloat(btn.dataset.speed);
+      });
+    });
+  </script>
+</body>
+</html>
