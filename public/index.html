@@ -27,6 +27,8 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
       min-height: 100vh;
       min-height: 100dvh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      -webkit-text-size-adjust: 100%;
     }
 
     .header {
@@ -197,10 +199,28 @@
       margin-top: 4px;
     }
 
+    /* 모바일 대응 — 태블릿 */
+    @media (max-width: 900px) {
+      main { padding: 30px 16px 40px; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* 모바일 대응 — 스마트폰 */
     @media (max-width: 640px) {
-      .stats { grid-template-columns: 1fr; }
-      .story-card { padding: 20px; }
+      .header { padding: 10px 16px; }
+      main { padding: 24px 14px 40px; }
+      .stats { grid-template-columns: 1fr; gap: 8px; }
+      .stat-box { padding: 14px; }
+      .stat-box .num { font-size: 1.3rem; }
+      .section-title { font-size: 0.65rem; }
+
+      .story-card { padding: 18px; border-radius: 14px; }
+      .story-card .genre-tag { font-size: 0.6rem; padding: 3px 8px; }
       .story-card h2 { font-size: 1.1rem; }
+      .story-card .subtitle { font-size: 0.74rem; }
+      .story-card .summary { font-size: 0.82rem; line-height: 1.55; }
+      .story-card .meta { gap: 8px; font-size: 0.66rem; flex-direction: column; }
+      .story-card .meta span:nth-child(even) { display: none; }
     }
   </style>
 </head>

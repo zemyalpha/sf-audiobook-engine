@@ -25,56 +25,56 @@ except ImportError:
 DEFAULT_VOICE_MAP = {
     "narrator": {
         "voice": "ko-KR-InJoonNeural",
-        "rate": "-5%",
+        "rate": "+15%",
         "pitch": "-2Hz",
         "volume": "+0%",
         "desc": "객관적이고 차분한 3인칭 서술자"
     },
     "seo_yeon": {
         "voice": "ko-KR-SunHiNeural",
-        "rate": "+0%",
+        "rate": "+18%",
         "pitch": "+3Hz",
         "volume": "+0%",
-        "desc": "여성 20대후반. 호기심 많고 감수성 풍부. 약간 높은 톤."
+        "desc": "여성 20대후반. 호기심 많고 감수성 풍부. 약간 높은 톤. 빠르고 산뜻한 호흡."
     },
     "min_jun": {
         "voice": "ko-KR-HyunsuMultilingualNeural",
-        "rate": "-3%",
+        "rate": "+12%",
         "pitch": "-5Hz",
         "volume": "+0%",
-        "desc": "남성 30대초반. 감정을 숨기는 성격. 낮고 묵직한 톤."
+        "desc": "남성 30대초반. 감정을 숨기는 성격. 낮고 묵직한 톤. 차분하지만 담담한 호흡."
     },
     "min_jun_angry": {
         "voice": "ko-KR-HyunsuMultilingualNeural",
-        "rate": "+8%",
+        "rate": "+25%",
         "pitch": "+5Hz",
         "volume": "+10%",
         "desc": "민준 - 분노/긴장 상태. 빠르고 높은 톤."
     },
     "min_jun_sad": {
         "voice": "ko-KR-HyunsuMultilingualNeural",
-        "rate": "-12%",
+        "rate": "+3%",
         "pitch": "-10Hz",
         "volume": "-5%",
         "desc": "민준 - 슬픔/무기력. 느리고 낮은 톤."
     },
     "seo_yeon_emotional": {
         "voice": "ko-KR-SunHiNeural",
-        "rate": "-5%",
+        "rate": "+10%",
         "pitch": "+8Hz",
         "volume": "+5%",
         "desc": "서연 - 감정 격해진 상태. 떨리는 듯한 톤."
     },
     "system": {
         "voice": "ko-KR-InJoonNeural",
-        "rate": "+0%",
+        "rate": "+10%",
         "pitch": "-15Hz",
         "volume": "-10%",
         "desc": "시스템 메시지/계약서/약관. 기계적이고 무미건조."
     },
     "internal": {
         "voice": "ko-KR-SunHiNeural",
-        "rate": "-8%",
+        "rate": "+5%",
         "pitch": "+1Hz",
         "volume": "-15%",
         "desc": "내면 독백. 속삭이듯 조용한 톤."

@@ -28,6 +28,10 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
       min-height: 100vh;
       min-height: 100dvh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      -webkit-text-size-adjust: 100%;
+      overflow-wrap: break-word;
+      word-break: keep-all;
     }
 
     /* 헤더 */
@@ -260,12 +264,49 @@
       font-family: 'Apple SD Gothic Neo', 'Pretendard', -apple-system, sans-serif;
     }
 
-    /* 모바일 대응 */
+    /* 모바일 대응 — 태블릿 */
+    @media (max-width: 900px) {
+      .cover { padding: 50px 20px 30px; }
+      .cover h1 { font-size: 1.7rem; }
+      .theme-box, .story-body, .ending, .tech-note { padding-left: 20px; padding-right: 20px; }
+    }
+
+    /* 모바일 대응 — 스마트폰 */
     @media (max-width: 640px) {
-      .cover { padding: 40px 20px 30px; }
-      .cover h1 { font-size: 1.5rem; }
-      .story-body p { font-size: 0.95rem; line-height: 1.85; }
-      .cover .meta { gap: 12px; font-size: 0.7rem; }
+      .header { padding: 10px 16px; }
+      .header a.back { font-size: 0.8rem; }
+
+      .cover { padding: 32px 16px 24px; }
+      .cover h1 { font-size: 1.45rem; line-height: 1.35; }
+      .cover .subtitle { font-size: 0.82rem; margin-bottom: 16px; }
+      .cover .genre-tag { font-size: 0.65rem; padding: 3px 10px; margin-bottom: 16px; }
+      .cover .meta { gap: 8px; font-size: 0.68rem; flex-direction: column; align-items: center; }
+      .cover .meta span:nth-child(even) { display: none; }
+
+      .theme-box, .story-body, .ending, .tech-note { padding-left: 16px; padding-right: 16px; }
+      .theme-box .inner { padding: 16px; }
+      .theme-box .content { font-size: 0.82rem; line-height: 1.65; }
+      .theme-box .inner a { font-size: 0.78rem; padding: 8px 20px; }
+
+      .story-body p {
+        font-size: 0.92rem;
+        line-height: 1.8;
+        margin-bottom: 1.2em;
+      }
+      .story-body .chapter-title { font-size: 0.72rem; margin-bottom: 20px; }
+      .story-body p.scene-break { font-size: 1rem; margin: 1.5em 0; }
+
+      .tech-note .inner { padding: 16px; }
+      .tech-note p { font-size: 0.78rem; }
+      .tech-note .source { font-size: 0.68rem; }
+
+      .ending { padding-bottom: 60px; }
+    }
+
+    /* 모바일 대응 — 초소형 (iPhone SE 등) */
+    @media (max-width: 380px) {
+      .cover h1 { font-size: 1.25rem; }
+      .story-body p { font-size: 0.88rem; }
     }
   </style>
 </head>

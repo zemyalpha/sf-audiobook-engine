@@ -31,6 +31,8 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
       min-height: 100vh;
       min-height: 100dvh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      -webkit-text-size-adjust: 100%;
     }
 
     .header {
@@ -319,10 +321,53 @@
 
     .tech-box strong { color: var(--highlight); }
 
+    /* 모바일 대응 — 태블릿 */
+    @media (max-width: 900px) {
+      .player-section, .cast-section, .tech-section { padding-left: 16px; padding-right: 16px; }
+      .cast-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 모바일 대응 — 스마트폰 */
     @media (max-width: 640px) {
-      .album-cover { width: 150px; height: 150px; }
-      .track-info h1 { font-size: 1.2rem; }
-      .control-buttons { gap: 12px; }
+      .header { padding: 10px 16px; }
+      .header a.back { font-size: 0.78rem; }
+      .header .title { font-size: 0.85rem; }
+
+      .player-section { padding: 30px 16px 16px; }
+      .album-cover { width: 130px; height: 130px; margin-bottom: 20px; }
+      .album-cover .icon { font-size: 3rem; }
+      .track-info .genre-tag { font-size: 0.62rem; padding: 3px 10px; margin-bottom: 10px; }
+      .track-info h1 { font-size: 1.25rem; }
+      .track-info .subtitle { font-size: 0.72rem; }
+
+      .audio-controls { padding: 16px; border-radius: 14px; }
+      .progress-bar { height: 5px; }
+      .time-display { font-size: 0.7rem; margin-bottom: 14px; }
+
+      .control-buttons {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .speed-selector { order: 2; width: 100%; justify-content: center; }
+      .speed-btn { font-size: 0.68rem; padding: 4px 8px; }
+      .btn-play { width: 50px; height: 50px; font-size: 1.3rem; order: 1; }
+      .btn-secondary { font-size: 0.72rem; padding: 7px 14px; order: 3; }
+
+      .cast-section, .tech-section { padding-bottom: 30px; }
+      .cast-grid { grid-template-columns: 1fr; gap: 10px; }
+      .cast-card { padding: 14px; }
+      .cast-card .char-name { font-size: 0.92rem; }
+      .cast-card .desc { font-size: 0.74rem; line-height: 1.5; }
+
+      .tech-box { padding: 16px; }
+      .tech-box p { font-size: 0.76rem; }
+    }
+
+    /* 초소형 (iPhone SE) */
+    @media (max-width: 380px) {
+      .track-info h1 { font-size: 1.1rem; }
+      .album-cover { width: 110px; height: 110px; }
     }
   </style>
 </head>
@@ -342,7 +387,7 @@
     <div class="track-info">
       <span class="genre-tag">드라마 오디오북</span>
       <h1>기억의 무게</h1>
-      <p class="subtitle">The Weight of Memory · 14분 28초</p>
+      <p class="subtitle">The Weight of Memory · 10분 28초 · 5개 음성 캐스팅</p>
     </div>
 
     <div class="audio-controls">
@@ -357,7 +402,7 @@
 
       <div class="time-display">
         <span id="currentTime">0:00</span>
-        <span id="totalTime">14:28</span>
+        <span id="totalTime">10:28</span>
       </div>
 
       <div class="control-buttons">
@@ -390,7 +435,17 @@
       <div class="cast-card min-jun">
         <div class="char-name">민준</div>
         <div class="voice-name">ko-KR-HyunsuMultilingualNeural</div>
-        <div class="desc">남성 30대초반. 감정을 숨기는 성격. 낮고 묵직한 톤. 분노 시 rate +8%, 슬픔 시 rate -12%.</div>
+        <div class="desc">남성 30대초반. 감정을 숨기는 성격. 낮고 묵직한 톤. 분노 시 rate +25%, 슬픔 시 pitch -10Hz.</div>
+      </div>
+      <div class="cast-card seo-yeon" style="border-left-color: var(--text-muted);">
+        <div class="char-name">내면 독백</div>
+        <div class="voice-name">ko-KR-SunHiNeural (속삭임)</div>
+        <div class="desc">인물의 내면 생각. volume -15%로 속삭이듯 처리.</div>
+      </div>
+      <div class="cast-card narrator" style="border-left-color: var(--system);">
+        <div class="char-name">시스템</div>
+        <div class="voice-name">ko-KR-InJoonNeural (기계적)</div>
+        <div class="desc">약관/계약서. pitch -15Hz, 무미건조한 톤.</div>
       </div>
     </div>
   </div>
@@ -403,7 +458,7 @@
       <p><strong>캐릭터 분석:</strong> 소설 텍스트를 문장 단위로 분할하여, 각 문장의 화자와 감정을 추출 → 캐릭터별 음성 프로필(rate/pitch/volume) 자동 적용</p>
       <p><strong>감정 연기:</strong> 8가지 감정 태그(calm/angry/sad/tense/happy/fear/whisper/narration)에 따라 음성 속도·높낮이·볼륨을 미세 조정하여 같은 캐릭터도 상황에 따라 다른 톤으로 연기</p>
       <p><strong>포맷:</strong> MP3 (128kbps) + M4B (오디오북, 96kbps AAC)</p>
-      <p><strong>분량:</strong> 83개 음성 세그먼트 + 씬 구분 정적 → 총 14분 28초</p>
+      <p><strong>분량:</strong> 62개 음성 세그먼트 + 씬 구분 정적 → 총 10분 28초</p>
     </div>
   </div>
 
