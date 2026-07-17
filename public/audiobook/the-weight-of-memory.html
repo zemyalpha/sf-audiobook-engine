@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0f23" />
+  <title>기억의 무게 — 드라마 오디오북 | SF Audiobook Engine</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f1a;
+      --surface: #161624;
+      --surface-hover: #1c1c30;
+      --border: #2a2a44;
+      --accent: #00d4aa;
+      --accent-dim: #00aa88;
+      --text: #d8d8ec;
+      --text-muted: #7a7a9a;
+      --text-dim: #555570;
+      --highlight: #e8c170;
+      --seo-yeon: #ff6b9d;
+      --min-jun: #5b9fff;
+      --narrator: #a78bfa;
+      --system: #fbbf24;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 15, 26, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header a.back {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    .header a.back:hover { color: var(--accent); }
+
+    .header .title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* 플레이어 */
+    .player-section {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px 20px;
+    }
+
+    .album-cover {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #161624 0%, #1c1c30 50%, #0f0f1a 100%);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .album-cover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0,212,170,0.1) 0%, transparent 60%);
+    }
+
+    .album-cover .icon {
+      font-size: 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .album-cover .pulse-ring {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      opacity: 0;
+      animation: pulse 2s ease-out infinite;
+    }
+
+    .album-cover.playing .pulse-ring { animation-play-state: running; }
+    .album-cover:not(.playing) .pulse-ring { display: none; }
+
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .track-info {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .track-info .genre-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      color: var(--accent);
+      background: rgba(0,212,170,0.1);
+      border: 1px solid rgba(0,212,170,0.3);
+      padding: 3px 10px;
+      border-radius: 16px;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+
+    .track-info h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .track-info .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* 오디오 컨트롤 */
+    .audio-controls {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s linear;
+      border-radius: 3px;
+    }
+
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 16px;
+    }
+
+    .control-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-play {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: var(--bg);
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, background 0.15s;
+    }
+
+    .btn-play:hover { background: var(--accent-dim); }
+    .btn-play:active { transform: scale(0.95); }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .speed-selector {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .speed-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .speed-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    /* 캐스팅 정보 */
+    .cast-section {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .cast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .cast-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .cast-card.seo-yeon { border-left-color: var(--seo-yeon); }
+    .cast-card.min-jun { border-left-color: var(--min-jun); }
+    .cast-card.narrator { border-left-color: var(--narrator); }
+
+    .cast-card .char-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .cast-card .voice-name {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-family: monospace;
+      margin-bottom: 8px;
+    }
+
+    .cast-card .desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* 기술 정보 */
+    .tech-section {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
+    .tech-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .tech-box p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 0.6em;
+    }
+
+    .tech-box p:last-child { margin-bottom: 0; }
+
+    .tech-box strong { color: var(--highlight); }
+
+    @media (max-width: 640px) {
+      .album-cover { width: 150px; height: 150px; }
+      .track-info h1 { font-size: 1.2rem; }
+      .control-buttons { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a class="back" href="/stories/the-weight-of-memory.html">← 소설</a>
+    <a class="back" href="/" style="margin-left:8px;">홈</a>
+    <span class="title" style="margin-left:auto;">SF Audiobook Engine</span>
+  </div>
+
+  <div class="player-section">
+    <div class="album-cover playing" id="albumCover">
+      <div class="pulse-ring"></div>
+      <span class="icon">🎧</span>
+    </div>
+
+    <div class="track-info">
+      <span class="genre-tag">드라마 오디오북</span>
+      <h1>기억의 무게</h1>
+      <p class="subtitle">The Weight of Memory · 14분 28초</p>
+    </div>
+
+    <div class="audio-controls">
+      <audio id="audioPlayer" preload="metadata">
+        <source src="/audio/weight-of-memory.mp3" type="audio/mpeg">
+        <source src="/audio/weight-of-memory.m4b" type="audio/mp4">
+      </audio>
+
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="time-display">
+        <span id="currentTime">0:00</span>
+        <span id="totalTime">14:28</span>
+      </div>
+
+      <div class="control-buttons">
+        <div class="speed-selector">
+          <button class="speed-btn" data-speed="0.75">0.75x</button>
+          <button class="speed-btn active" data-speed="1.0">1.0x</button>
+          <button class="speed-btn" data-speed="1.25">1.25x</button>
+          <button class="speed-btn" data-speed="1.5">1.5x</button>
+        </div>
+        <button class="btn-play" id="playBtn">▶</button>
+        <button class="btn-secondary" id="back30Btn">⟲ 30s</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 캐스팅 -->
+  <div class="cast-section">
+    <p class="section-title">음성 캐스팅</p>
+    <div class="cast-grid">
+      <div class="cast-card narrator">
+        <div class="char-name">서술자</div>
+        <div class="voice-name">ko-KR-InJoonNeural</div>
+        <div class="desc">객관적이고 차분한 3인칭 서술. 약간 낮고 안정적인 톤.</div>
+      </div>
+      <div class="cast-card seo-yeon">
+        <div class="char-name">서연</div>
+        <div class="voice-name">ko-KR-SunHiNeural</div>
+        <div class="desc">여성 20대후반. 호기심 많고 감수성 풍부. 맑고 약간 높은 톤. 감정 상태에 따라 pitch/rate 자동 조정.</div>
+      </div>
+      <div class="cast-card min-jun">
+        <div class="char-name">민준</div>
+        <div class="voice-name">ko-KR-HyunsuMultilingualNeural</div>
+        <div class="desc">남성 30대초반. 감정을 숨기는 성격. 낮고 묵직한 톤. 분노 시 rate +8%, 슬픔 시 rate -12%.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기술 정보 -->
+  <div class="tech-section">
+    <p class="section-title">오디오북 엔진 정보</p>
+    <div class="tech-box">
+      <p><strong>엔진:</strong> Edge-TTS (Microsoft Neural TTS) + FFmpeg</p>
+      <p><strong>캐릭터 분석:</strong> 소설 텍스트를 문장 단위로 분할하여, 각 문장의 화자와 감정을 추출 → 캐릭터별 음성 프로필(rate/pitch/volume) 자동 적용</p>
+      <p><strong>감정 연기:</strong> 8가지 감정 태그(calm/angry/sad/tense/happy/fear/whisper/narration)에 따라 음성 속도·높낮이·볼륨을 미세 조정하여 같은 캐릭터도 상황에 따라 다른 톤으로 연기</p>
+      <p><strong>포맷:</strong> MP3 (128kbps) + M4B (오디오북, 96kbps AAC)</p>
+      <p><strong>분량:</strong> 83개 음성 세그먼트 + 씬 구분 정적 → 총 14분 28초</p>
+    </div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('audioPlayer');
+    const playBtn = document.getElementById('playBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalTimeEl = document.getElementById('totalTime');
+    const albumCover = document.getElementById('albumCover');
+
+    function fmt(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        playBtn.textContent = '\u23F8';
+        albumCover.classList.add('playing');
+      } else {
+        audio.pause();
+        playBtn.textContent = '\u25B6';
+        albumCover.classList.remove('playing');
+      }
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      totalTimeEl.textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + '%';
+      currentTimeEl.textContent = fmt(audio.currentTime);
+    });
+
+    audio.addEventListener('ended', () => {
+      playBtn.textContent = '\u25B6';
+      albumCover.classList.remove('playing');
+    });
+
+    progressBar.addEventListener('click', (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = pct * audio.duration;
+    });
+
+    // 속도
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        audio.playbackRate = parseFloat(btn.dataset.speed);
+      });
+    });
+
+    // 30초 뒤로
+    document.getElementById('back30Btn').addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 30);
+    });
+  </script>
+</body>
+</html>
